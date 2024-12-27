@@ -23,6 +23,7 @@ const props = defineProps({
 })
 const { data } = toRefs(props.data)
 const labelRef = ref(data.value.label)
+const isVisible = ref(data.value.isVisible)
 const form = reactive({
   qp: "",
   type: "",

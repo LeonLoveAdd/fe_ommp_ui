@@ -1,5 +1,5 @@
 import { ref } from "vue";
-import { Position } from "@vue-flow/core";
+import { Position, MarkerType } from "@vue-flow/core";
 //小节点通用style
 const usualSmallStyle = ref({
     width: '320px',
@@ -76,6 +76,7 @@ const transformData = (data) => {
                     target: customNode.target,
                     isChild: true,
                     label: id,
+                    isVisible: false,
                 },
                 style: {
                     ...usualSmallStyle.value
@@ -88,8 +89,9 @@ const transformData = (data) => {
                 source: id,
                 target: customNode.target,
                 style: { stroke: '#ccc' },
+                markerEnd: MarkerType.ArrowClosed,
                 sourceHandle: `${id}_right`,  // 使用节点 node1 的 left 句柄作为起点(sourceHandle为source节点的id)
-                targetHandle: `${customNode.target}_left`  // 使用节点 node2 的 right 句柄作为终点(targetHandle为target节点的id) 
+                targetHandle: `${customNode.target}_left`,  // 使用节点 node2 的 right 句柄作为终点(targetHandle为target节点的id) 
             };
             arr.push({ id: `${moduleName}_${index}` });
             nodes.value.push(child);
@@ -102,6 +104,7 @@ const transformData = (data) => {
             type: 'module',
             isParent: true,
             position: { x: 50 + (340 + 50) * index, y: 5 },
+            parentNode: null,
             data: {
                 label: moduleName,
                 isParent: true,

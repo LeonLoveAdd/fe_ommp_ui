@@ -82,17 +82,25 @@
         size="small" type="info" round @click="exportConfig">下载</el-button> -->
     </el-row>
     <el-row>
-      <el-col :span="6">
-        <div class="grid-content ep-bg-purple-light" justify="end">
-          <el-button class="el-button el-button--primary is-plain" 
-            size="small" type="primary" round @click="addNode('b')">添加模块</el-button>
-          <el-button :disabled="parentSetting.length <= 0" class="el-button el-button--primary is-plain" 
-            size="small" type="success" round @click="deleteModules()">删除模块</el-button>
-          <el-button class="el-button el-button--primary is-plain" 
-            size="small" type="info" round @click="saveConfig(nodes)">保存配置</el-button>
-          <el-button class="el-button el-button--primary is-plain" 
-            size="small" type="info" round @click="searchNodes">搜索</el-button>
-        </div>
+      <el-col :span="12">
+        <el-form label-width="100px">
+          <el-form-item>
+            <div class="grid-content ep-bg-purple-light" justify="end">
+              <el-button class="el-button el-button--primary is-plain" 
+                size="small" type="primary" round @click="addNode('b')" :icon="Plus">添加模块</el-button>
+              <el-button :disabled="parentSetting.length <= 0" class="el-button el-button--primary is-plain" 
+                size="small" round @click="deleteModules()" :icon="Minus">删除模块</el-button>
+              <el-button class="el-button el-button--primary is-plain" 
+                size="small" type="info" round @click="saveConfig(nodes)" :icon="Finished">保存配置</el-button>
+              <el-button class="el-button el-button--primary is-plain" 
+                size="small" type="info" round @click="searchNodes" :icon="Search">搜索</el-button>
+              <el-button class="el-button el-button--primary is-plain" 
+                size="small" type="info" round @click="resetForm" :icon="Refresh">重置搜索框</el-button>
+              <el-button class="el-button el-button--primary is-plain" 
+                size="small" type="info" round @click="resetViews" :icon="Refresh">重置视图</el-button>
+            </div>
+          </el-form-item>
+        </el-form>
       </el-col>
     </el-row>
       <!-- @node-double-click="exportConfig" 
@@ -192,12 +200,12 @@
 <script setup>
 import { nodes, edges, usualSmallStyle, usualBigStyle, settingValue, transformData, saveConfig, obj } from './components/vueflowJS'
 import { reactive, ref, onMounted, nextTick } from "vue";
-import { VueFlow, useVueFlow } from "@vue-flow/core";
+import { VueFlow, useVueFlow, MarkerType } from "@vue-flow/core";
 import { Background } from '@vue-flow/background';
 import { ControlButton, Controls } from '@vue-flow/controls';
 import { MiniMap } from '@vue-flow/minimap';
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search } from '@element-plus/icons-vue'
+import { Search, Plus, Minus, Finished, Refresh } from '@element-plus/icons-vue'
 import Icon from './components/Icon.vue'
 import jsYaml from 'js-yaml';
 import CustomModuleNode from './components/SpecialNode.vue'; 
@@ -219,6 +227,8 @@ const form2 = ref();
 const form3 = ref();
 const form4 = ref();
 const form5 = ref();
+const nodesSave = ref();
+const edgesSave = ref();
 const targetValue = ref({  //存放target中变更前后的值
   oldValue: '',
   newValue: ''
@@ -256,6 +266,8 @@ const rules = reactive({
 })
 
 onMounted(() => {
+  nodesSave.value = nodes.value;
+  edgesSave.value = edges.value;
   //这里调用接口获取上次保存到库里的值
   transformData(obj.data)
   if(nodes.value.length > 0){
@@ -265,6 +277,28 @@ onMounted(() => {
     })
   }
 })
+
+// 重置搜索框
+const resetForm = () => {
+  form1.value.resetFields()
+  form2.value.resetFields()
+  form3.value.resetFields()
+  form4.value.resetFields()
+  form5.value.resetFields()
+}
+
+// 重置视图 
+const resetViews = () => {
+  nodesSave.value.forEach(item => {
+    item.style.border = '1px solid #bbb'
+  })
+  edgesSave.value.forEach(item => {
+    item.style.stroke = '#ccc';
+    item.style.strokeWidth = 1;
+  })
+  nodes.value = nodesSave.value;
+  edges.value = edgesSave.value;
+}
 
 // 匹配搜索条件
 const matchesSearchCriteria = (node, formSearch) => {
@@ -292,26 +326,42 @@ const matchesSearchCriteria = (node, formSearch) => {
   }
 }
 
+// 获取父节点id
+const getParentIdByChildId = (setData) => {
+  const setArray = Array.from(setData);
+  let modules = [];
+  if(setArray.length > 0){
+    setArray.forEach(item => {
+      nodesSave.value.filter(e => {
+        if(e.id === item){
+          modules.push(e.parentNode)
+        }
+      })
+    })
+  }
+  return new Set(modules)
+}
+
 // 设置高亮
 const highlighted = (highlightedNodes) => {
-  nodes.value.forEach(item => {
-    if(highlightedNodes.has(item.id)){
-      // 筛选到的节点高亮设置
+  // 根据搜索条件高亮显示相关节点，非相关节点隐藏
+  nodes.value = nodes.value.filter(item => {
+    let temp = getParentIdByChildId(highlightedNodes)
+    return (temp.has(item.id) || highlightedNodes.has(item.id))
+  })
+  nodes.value?.forEach(item => {
+    // 筛选到的节点高亮设置
+    if(item.isChild){
       item.style.border = '3px solid #FFC0CB';
-    } else {
-      item.style.border = '1px solid #bbb';
     }
   });
-  edges.value.forEach(item => {
-    if(highlightedNodes.has(item.id)){
-      // 筛选到的节点高亮设置
-      item.style.stroke = '#FFC0CB';
-      item.style.strokeWidth = 3;
-    } else {
-      item.style.stroke = '#ccc';
-      item.style.strokeWidth = 1;
-    }
+  // 根据搜索条件高亮显示相关边，非相关边隐藏
+  edges.value = edges.value.filter(item => highlightedNodes.has(item.id))
+  edges.value?.forEach(item => {
+    item.style.stroke = '#FFC0CB';
+    item.style.strokeWidth = 3;
   })
+
 }
 
 // 高亮所有符合条件的点和边
@@ -347,6 +397,8 @@ const searchNodes = () => {
     form4.value.validate(),
     form5.value.validate(),
   ]).then(() => {
+    nodes.value = nodesSave.value;
+    edges.value = edgesSave.value;
     // 如果所有表单都验证成功，执行后续逻辑
     formSearch.bank = formSearch.bank ? formSearch.bank : '0000';
     // 找到起点模块中符合搜索条件的规则节点
@@ -552,7 +604,8 @@ const updateRules = (data) => {
             source: data.newValue, 
             target: item.target,
             sourceHandle: `${data.newValue}_right`,
-            targetHandle: `${item.target}_left`
+            targetHandle: `${item.target}_left`,
+            markerEnd: MarkerType.ArrowClosed
           }
         } else if (item.target === data.oldValue) {
           edge = {
@@ -562,7 +615,8 @@ const updateRules = (data) => {
             source: item.source, 
             target: data.newValue,
             sourceHandle: `${item.source}_right`,
-            targetHandle: `${data.newValue}_left`
+            targetHandle: `${data.newValue}_left`,
+            markerEnd: MarkerType.ArrowClosed
           }
         }
         removeEdges(item.id)
@@ -638,6 +692,7 @@ const addNode = (nodeType,data) => {
           type: 'module',
           position: { x: 50+(340+50) * bigNodeIndex.value, y: 5 },
           isParent: true,
+          parentNode: null,
           data: { 
             label: value,
             isParent: true,
@@ -664,7 +719,8 @@ const addEdge = (e) => {
     target: e.target,
     style: { stroke: '#ccc' },
     sourceHandle: e.sourceHandle,  // 使用节点 node1 的 left 句柄作为起点(sourceHandle为source节点的id)
-    targetHandle: e.targetHandle  // 使用节点 node2 的 right 句柄作为终点(targetHandle为target节点的id) 
+    targetHandle: e.targetHandle,  // 使用节点 node2 的 right 句柄作为终点(targetHandle为target节点的id) 
+    markerEnd: MarkerType.ArrowClosed
   };
   nodes.value.find(item => {
     if(item.id === e.source){
@@ -703,7 +759,8 @@ const confirmOption = () => {
       source: nodeE.id, 
       target: form.target,
       sourceHandle: `${nodeE.id}_right`,
-      targetHandle: `${form.target}_left`
+      targetHandle: `${form.target}_left`,
+      markerEnd: MarkerType.ArrowClosed
     }
     // 更改target后的新线
     addEdge(edge);
