@@ -10,14 +10,15 @@
     </NodeToolbar>
     <Handle :id="labelRef + '_' + Position.Left" type="target" :position="Position.Left"></Handle>
     <div>
-      <el-input input-style="border: none;width: 150px;height: 14px;color: #ccc;font-size: 12px;text-align: center;border-radius: 4px;" 
+      <el-input input-style="border: none;width: 230px;height: 20px;color: #46cdcf;font-weight:700;font-size: 18px;text-align: center;border-radius: 4px;" 
+      :title="lableTest"
       v-model="lableTest"
       @change="updateId"
       @mousedown.stop="handleMouseDown"
       @click.stop="handleInputClick" />
     </div>
     <!-- <div style="position: relative;top: -20px;left: -80px;"></div> -->
-    <div style="position: absolute;top: 3px;left: 20px;">
+    <div style="position: absolute;top: 6px;left: 20px;">
       <el-tooltip content="添加规则" placement="top-start">
         <el-button style="width: 14px;height: 14px;padding: 6px;" circle @click.stop="handleButtonAdd">
           <el-icon style="vertical-align: middle;margin: 0 auto;"><Plus /></el-icon>
@@ -25,7 +26,7 @@
         </el-button>
       </el-tooltip>
     </div>
-    <div style="position: absolute;top: 3px;right: 20px;">
+    <div style="position: absolute;top: 6px;right: 20px;">
       <el-tooltip content="删除规则" placement="top-start">
         <el-button style="width: 14px;height: 14px;padding: 6px;" circle @click.stop="handleButtonDelete">
           <el-icon style="vertical-align: middle;margin: 0 auto;"><Minus /></el-icon>
@@ -105,4 +106,7 @@ defineExpose({ updateIdN })
 </script>
 
 <style scoped>
+.transparent-input .el-input__inner {
+  background-color: transparent !important;
+}
 </style>

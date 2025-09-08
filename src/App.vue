@@ -1,9 +1,9 @@
 <template>
   <div class="vue-flow-container">
-    <el-row class="row-bg" justify="space-between">
-      <el-col :span="6">
-        <el-form ref="form1" :rules="rules" :model="formSearch" label-width="100px">
-          <el-form-item label="qp" prop="qp">
+    <el-row class="row-bg" style="border-bottom: 1px solid #ccc;margin-bottom: 15px;" justify="space-between">
+      <el-col :span="4">
+        <el-form ref="form1" :rules="rules" :model="formSearch" label-width="120px">
+          <el-form-item label="请求响应标识" prop="qp">
             <!-- <el-input :prefix-icon="Search" size="small" v-model="formSearch.qp" /> -->
             <el-select
               v-model="formSearch.qp"
@@ -22,9 +22,9 @@
           </el-form-item>
         </el-form>
       </el-col>
-      <el-col :span="6">
-        <el-form ref="form2" :rules="rules" :model="formSearch" label-width="100px">
-          <el-form-item label="type" prop="type">
+      <el-col :span="4">
+        <el-form ref="form2" :rules="rules" :model="formSearch" label-width="120px">
+          <el-form-item label="交易类型标识" prop="type">
             <!-- <el-input :prefix-icon="Search" size="small" v-model="formSearch.type" /> -->
             <el-select
               v-model="formSearch.type"
@@ -43,25 +43,25 @@
           </el-form-item>
         </el-form>
       </el-col>
-      <el-col :span="6">
-        <el-form ref="form3" :rules="rules" :model="formSearch" label-width="100px">
-          <el-form-item label="bank" prop="bank">
+      <el-col :span="4">
+        <el-form ref="form3" :rules="rules" :model="formSearch" label-width="120px">
+          <el-form-item label="银行编码" prop="bank">
             <!-- <el-input :prefix-icon="Search" size="small" v-model="formSearch.bank" /> -->
             <el-input size="small" v-model="formSearch.bank" />
           </el-form-item>
         </el-form>
       </el-col>
-      <el-col :span="6">
-        <el-form ref="form4" :rules="rules" :model="formSearch" label-width="100px">
-          <el-form-item label="trxtype" prop="trxtype">
+      <el-col :span="4">
+        <el-form ref="form4" :rules="rules" :model="formSearch" label-width="120px">
+          <el-form-item label="交易类行码" prop="trxtype">
             <!-- <el-input :prefix-icon="Search" size="small" v-model="formSearch.trxtype" /> -->
             <el-input size="small" v-model="formSearch.trxtype" />
           </el-form-item>
         </el-form>
       </el-col>
-      <el-col :span="6">
-        <el-form ref="form5" :rules="rules" :model="formSearch" label-width="100px">
-          <el-form-item label="inputModule" prop="inputModule">
+      <el-col :span="4">
+        <el-form ref="form5" :rules="rules" :model="formSearch" label-width="120px">
+          <el-form-item label="所在模块" prop="inputModule">
             <el-select
               v-model="formSearch.inputModule"
               class="m-2"
@@ -78,26 +78,37 @@
           </el-form-item>
         </el-form>
       </el-col>
+      <el-col :span="24" class="center-content">
+        <div style="margin-bottom: 15px;">
+          <el-button class="el-button el-button--primary is-plain" 
+                size="small" type="info" round @click="searchNodes" :icon="Search">搜索</el-button>
+          <el-switch style="margin-left: 30px;" v-model="visiable" @change="nodeVisiable" active-text="搜索时隐藏无关节点" inactive-text="搜索时不隐藏无关节点" />
+          <el-button style="margin-left: 30px;" class="el-button el-button--primary is-plain" 
+                size="small" type="info" round @click="resetForm" :icon="Refresh">重置搜索框</el-button>
+        </div>
+      </el-col>
       <!-- <el-button class="el-button el-button--primary is-plain" 
         size="small" type="info" round @click="exportConfig">下载</el-button> -->
     </el-row>
     <el-row>
-      <el-col :span="12">
+      <el-col :span="18">
         <el-form label-width="100px">
           <el-form-item>
             <div class="grid-content ep-bg-purple-light" justify="end">
               <el-button class="el-button el-button--primary is-plain" 
-                size="small" type="primary" round @click="addNode('b')" :icon="Plus">添加模块</el-button>
+                size="small" type="primary" @click="dragModule('bankcomm')" :icon="Plus">添加通讯模块</el-button>
+              <el-button class="el-button el-button--primary is-plain" 
+                size="small" type="primary" @click="dragModule('')" :icon="Plus">添加普通模块</el-button>
+              <el-button class="el-button el-button--primary is-plain" 
+                size="small" type="primary" @click="addNode('b')" :icon="Plus">添加自定义模块</el-button>
               <el-button :disabled="parentSetting.length <= 0" class="el-button el-button--primary is-plain" 
-                size="small" round @click="deleteModules()" :icon="Minus">删除模块</el-button>
+                size="small" @click="deleteModules()" :icon="Minus">删除模块</el-button>
               <el-button class="el-button el-button--primary is-plain" 
-                size="small" type="info" round @click="saveConfig(nodes)" :icon="Finished">保存配置</el-button>
+                size="small" type="info" @click="saveSetting()" :icon="Finished">保存配置</el-button>
               <el-button class="el-button el-button--primary is-plain" 
-                size="small" type="info" round @click="searchNodes" :icon="Search">搜索</el-button>
+                size="small" type="info" @click="releaseSetting()" :icon="Finished">发布</el-button>
               <el-button class="el-button el-button--primary is-plain" 
-                size="small" type="info" round @click="resetForm" :icon="Refresh">重置搜索框</el-button>
-              <el-button class="el-button el-button--primary is-plain" 
-                size="small" type="info" round @click="resetViews" :icon="Refresh">重置视图</el-button>
+                size="small" type="info" @click="resetViews" :icon="Refresh">重置视图</el-button>
             </div>
           </el-form-item>
         </el-form>
@@ -106,19 +117,22 @@
       <!-- @node-double-click="exportConfig" 
       @node-drag-start="onNodeDragStart"
       :node-types="{ customNode: CustomNode, module: CustomModuleNode }"
-      @node-drag-stop="onNodeDragStop" -->
+      @node-drag-stop="onNodeDragStop"
+      @nodes-initialized="layoutGraph('TB')" -->
     <VueFlow :nodes="nodes" :edges="edges" 
+      @node-drag-stop="onNodeDragStop"
       @connect-start="onConnectStart"
       @connect="onConnect"
       @connect-end="onConnectEnd"
       @node-double-click="onNodeClick" 
       @node-click="onNodeSClick" 
       @edge-click="onEdgeClick"
-      :default-viewport="{ zoom: 1.1 }"
+      :delete-key-code="false"
+      :default-viewport="{ zoom: 0.8 }"
       :min-zoom="0.2"
       :max-zoom="4"
       :node-types="{ customNode: CustomNode, module: CustomModuleNode }"
-      style="height: 90vh; width: 90vw">
+      style="height: 95vh; width: 90vw">
       <Controls position="top-left">
         <!-- <ControlButton title="Reset Transform" @click="resetTransform">
           <Icon name="reset" />
@@ -147,10 +161,10 @@
       </template>
     </VueFlow>
 
-    <el-dialog v-model="dialogFormVisible" title="selecting rules" width="500">
+    <el-dialog v-model="dialogFormVisible" title="规则属性修改" width="500">
       <el-form :model="form">
-        <el-form-item label="qp" :label-width="formLabelWidth">
-          <el-select size="small" v-model="form.qp" placeholder="请求相应标识">
+        <el-form-item label="请求响应标识" :label-width="formLabelWidth">
+          <el-select size="small" v-model="form.qp" placeholder="请求响应标识">
             <el-option
               v-for="item in settingValue.qp"
               :key="item.value"
@@ -159,7 +173,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item size="small" label="type" :label-width="formLabelWidth">
+        <el-form-item size="small" label="交易类型标识" :label-width="formLabelWidth">
           <el-select v-model="form.type" placeholder="交易类型标识">
             <el-option
               v-for="item in settingValue.type"
@@ -169,13 +183,13 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item size="small" label="bank" :label-width="formLabelWidth">
+        <el-form-item size="small" label="银行编码" :label-width="formLabelWidth">
           <el-input v-model="form.bank" autocomplete="off" placeholder="银行编码" />
         </el-form-item>
-        <el-form-item size="small" label="trxtype" :label-width="formLabelWidth">
+        <el-form-item size="small" label="交易类行码" :label-width="formLabelWidth">
           <el-input v-model="form.trxtype" autocomplete="off" placeholder="交易类行码" />
         </el-form-item>
-        <el-form-item size="small" label="target" :label-width="formLabelWidth">
+        <el-form-item size="small" label="目标模块" :label-width="formLabelWidth">
           <el-select v-model="form.target" @change="updataTarget" placeholder="目的模块">
             <el-option
               v-for="item in settingValue.target"
@@ -188,8 +202,51 @@
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button size="small" @click="dialogFormClose">Cancel</el-button>
+          <el-button size="small" @click="dialogFormClose">取消</el-button>
           <el-button size="small" type="primary" @click="confirmOption">
+            确认
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="dialogModulesVisible" title="模块属性修改" width="500">
+      <el-form :model="moduleForm">
+        <el-form-item label="topic" :label-width="formLabelWidth">
+          <el-input v-model="moduleForm.topic" autocomplete="off" placeholder="请输入topic" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button size="small" @click="dialogModulesClose">取消</el-button>
+          <el-button size="small" type="primary" @click="confirmModules">
+            确认
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="dialogFormComparison" title="对比" width="600">
+      <el-form :model="form" label-position="top">
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="上一版本" :label-width="formLabelWidth">
+              <div class="formatted-json" v-html="comparsion.oldVision"></div>
+              <!-- <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 1000 }" resize="none" v-model="comparsion.oldVision" autocomplete="off" disabled /> -->
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="此次版本" :label-width="formLabelWidth">
+              <div class="formatted-json" v-html="diffContent"></div>
+              <!-- <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 1000 }" resize="none" v-model="comparsion.newVision" autocomplete="off" disabled /> -->
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button size="small" @click="releaseCancel()">Cancel</el-button>
+          <el-button size="small" type="primary" @click="releaseSettingComfirm">
             Confirm
           </el-button>
         </div>
@@ -198,30 +255,37 @@
   </div>
 </template>
 <script setup>
-import { nodes, edges, usualSmallStyle, usualBigStyle, settingValue, transformData, saveConfig, obj } from './components/vueflowJS'
+import { nodes, edges, usualSmallStyle, usualBigStyle, settingValue, transformData, saveConfig, obj, positionInit, bankcommPositionInit } from './components/vueflowJS'
 import { reactive, ref, onMounted, nextTick } from "vue";
 import { VueFlow, useVueFlow, MarkerType } from "@vue-flow/core";
 import { Background } from '@vue-flow/background';
 import { ControlButton, Controls } from '@vue-flow/controls';
 import { MiniMap } from '@vue-flow/minimap';
+import { diffWords } from 'diff';
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Minus, Finished, Refresh } from '@element-plus/icons-vue'
 import Icon from './components/Icon.vue'
+import ELK from 'elkjs/lib/elk.bundled.js';
 import jsYaml from 'js-yaml';
 import CustomModuleNode from './components/SpecialNode.vue'; 
 import CustomNode from './components/SpecialEdge.vue';
-const { updateNodeData, applyEdgeChanges } = useVueFlow()
+const { updateNodeData, applyEdgeChanges, fitView } = useVueFlow()
 const heightB = ref()  //用于计算父节点动态高度
 const formLabelWidth = ref(100);
 const smallNodeIndex = ref(1);  //规则数量
 const bigNodeIndex = ref(1); //模块数量
 const dialogFormVisible = ref(false);
+const dialogModulesVisible = ref(false);
+const dialogFormComparison = ref(false);
 const childSetting = ref(); //选中的规则
 const childrenSetting = ref([]); //选中规则的暂存
 const parSetting = ref(); //选中的模块
 const parentSetting = ref([]); //选中模块的暂存
+const parentNode = ref(null);
 const CustomNodeRef = ref(null);
 const CustomModuleNodeRef = ref(null);
+const visiable = ref(false);
+const diffContent = ref('');
 const form1 = ref();
 const form2 = ref();
 const form3 = ref();
@@ -229,6 +293,7 @@ const form4 = ref();
 const form5 = ref();
 const nodesSave = ref();
 const edgesSave = ref();
+const finalObj = ref({});
 const targetValue = ref({  //存放target中变更前后的值
   oldValue: '',
   newValue: ''
@@ -264,19 +329,331 @@ const rules = reactive({
     { len: 4, message: '请输入4位bank码', trigger: 'change' },
   ],
 })
+const comparsion = ref({
+    oldVision: {},
+    newVision: {}
+})
+const moduleForm = reactive({
+  topic: ''
+})
+
+const handleDeleteKey = (event) => {
+  const activeElement = document.activeElement;
+  const isInput = activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable;
+  if (event.key === 'Delete') {
+    if(parentSetting.value.length > 0){
+      deleteModules();
+    } else if(childrenSetting.value.length > 0){
+      ElMessage({
+        type: 'error',
+        message: '目前仅支持模块节点的快捷键删除!',
+      });
+    }
+  }
+  if (!isInput && ( event.key === 'Backspace' || event.keyCode === 8)){
+    console.log('backspace')
+    event.preventDefault(); // 阻止默认行为
+  }
+};
+
+// 关闭模块配置框
+const dialogModulesClose = () => {
+  moduleForm.topic = '';
+  parentNode.value = null;
+  dialogModulesVisible.value = false;
+}
+
+// 确认模块配置
+const confirmModules = () => {
+  let node = nodes.value.find(item => item.id === parentNode.value.id);
+  if(node){
+    node.topic = moduleForm.topic;
+  }
+  moduleForm.topic = '';
+  parentNode.value = null;
+  dialogModulesVisible.value = false;
+}
+
+// 双击选中节点
+const onNodeClick = (event) => {
+  // 双击子节点可打开该子节点的配置框，更改其中配置
+  if(event.node.isChild){
+    // 双击选中该子节点
+    form.qp = event.node.data.qp;
+    form.type = event.node.data.type;
+    form.bank = event.node.data.bank;
+    form.trxtype = event.node.data.trxtype;
+    form.target = event.node.data.target;
+    childSetting.value = event.node;
+    targetValue.value.oldValue = form.target
+    dialogFormVisible.value = !dialogFormVisible.value
+  } else {
+    parentNode.value = nodes.value.find(item => item.id === event.node.id);
+    moduleForm.topic = parentNode.value.topic;
+    dialogModulesVisible.value = !dialogModulesVisible.value
+  }
+}
 
 onMounted(() => {
-  nodesSave.value = nodes.value;
-  edgesSave.value = edges.value;
+  window.addEventListener('keydown', handleDeleteKey, true);
+  nextTick(() => {
+    // 保存初始数据
+    nodesSave.value = JSON.parse(JSON.stringify(nodes.value));
+    edgesSave.value = JSON.parse(JSON.stringify(edges.value));
+  });
   //这里调用接口获取上次保存到库里的值
-  transformData(obj.data)
+  transformData(obj.data);
   if(nodes.value.length > 0){
     nodes.value.filter(item => { return item.isParent === true })?.map(e => {
       // 不推荐在map中直接处理改变外部数据的逻辑，后续修改
       settingValue.value.target.push({ label: e.id, value: e.id })
     })
   }
+  reformPosition(nodes.value);
 })
+
+// 计算模块节点的位置(页面初始化时调用)
+const reformPosition = (nodes) => {
+  let bankcomm = [];
+  let bridge = [];
+  let fixIso = [];
+  let cupdcomm = [];
+  nodes.forEach((item, index) => {
+    if(item.isParent){
+      if (item.id.indexOf('bankcomm') > -1){
+          bankcomm.push(item);
+      } else if (item.id.indexOf('bridge') > -1){
+          bridge.push(item);
+      } else if (item.id.indexOf('cupdcomm') === -1){
+          cupdcomm.push(item);
+      } else {
+          fixIso.push(item);
+      }
+    }
+  });
+  bridge.forEach((node, index) => {
+      let posi = positionInit(index, node.id);
+      node.position = { x: posi.x, y: posi.y };
+  });
+  bankcomm.forEach((node, index) => {
+      let obj = positionInit(index, node.id);
+      node.position = { x: obj.x, y: obj.y };
+  });
+  fixIso.forEach((node, index) => {
+      let obj = positionInit(index, node.id);
+      node.position = { x: obj.x, y: obj.y };
+  });
+  cupdcomm.forEach((node, index) => {
+      let obj = positionInit(index, node.id);
+      node.position = { x: obj.x, y: obj.y };
+  });
+}
+
+// 添加节点时的位置计算
+const getPosition = (index, value) => {
+  let bankcomm = [];
+  let bridge = [];
+  let fixIso = [];
+  let cupdcomm = [];
+  let arr = nodes.value.filter(item => item.isParent);
+  nodes.value.forEach((item, index) => {
+    if(item.isParent){
+      if (item.id.indexOf('bankcomm') > -1){
+          bankcomm.push(item);
+      } else if (item.id.indexOf('bridge') > -1){
+          bridge.push(item);
+      } else if (item.id.indexOf('cupdcomm') > -1){
+          cupdcomm.push(item);
+      } else {
+          fixIso.push(item);
+      }
+    }
+  });
+  // 根据节点的类型和当前节点的数量，计算节点的位置(已有节点)
+  if(arr.length > index){
+    const targetObject = nodes.value[index];
+    const array1Index = bankcomm.indexOf(targetObject);
+    const array2Index = bridge.indexOf(targetObject);
+    const array3Index = fixIso.indexOf(targetObject);
+    const array4Index = cupdcomm.indexOf(targetObject);
+    if (array1Index !== -1) {
+      // 如果对象在 bankcomm 数组中，返回 positionInit 函数计算的位置
+      return positionInit(array1Index, targetObject.id);
+    } else if (array2Index !== -1) {
+      // 如果对象在 bridge 数组中，返回 positionInit 函数计算的位置
+      return positionInit(array2Index, targetObject.id);
+    } else if (array3Index !== -1) {
+      // 如果对象在 fixIso 数组中，返回 positionInit 函数计算的位置
+      return positionInit(array3Index, targetObject.id);
+    } else if (array4Index !== -1) {
+      // 如果对象在 cupdcomm 数组中，返回 positionInit 函数计算的位置
+      return positionInit(array4Index, targetObject.id);
+    }
+  } else {
+    // 新增节点时的位置计算
+    if(value.indexOf('bankcomm') > -1){
+      return positionInit(bankcomm.length, value);
+    } else if(value.indexOf('bridge') > -1){
+      return positionInit(bridge.length, value);
+    } else if(value.indexOf('cupdcomm') > -1){
+      return positionInit(cupdcomm.length, value);
+    } else {
+      return positionInit(fixIso.length, value);
+    }
+  }
+}
+
+// 格式化节点数据
+const formConfig = (nodes) => {
+  let obj = {};
+  obj.modules = {};
+  let names = [];
+  nodes.forEach(item => {
+      if (item.isParent) {
+          names.push(item.id);
+      }
+  });
+  names.forEach(item => {
+    let arr = []
+    nodes.forEach(e => {
+      if (e.parentNode === item) {
+        arr.push({
+          qp: e.data.qp,
+          type: e.data.type,
+          trxtype: e.data.trxtype,
+          bank: e.data.bank,
+          routeType: "I",
+          target: e.data.target,
+        })
+      }
+      obj.modules[item] = arr
+    })
+  })
+  return obj;
+}
+
+// 检测闭环
+const detectCycles = (nodes, edges) => {
+  const visited = new Set();
+  const recStack = new Set();
+  const cycles = [];
+
+  // 深度优先搜索，检查当前节点的所有出边，并递归的访问目标节点
+  const dfs = (node, path, startModuleId, qpType) => {
+    visited.add(node.id); // 已访问节点
+    recStack.add(node.id); // 跟踪递归栈
+    path.push(node.id); // 存储所有闭环路径
+
+    edges.forEach(edge => {
+      if (edge.source === node.id && (qpType === null || edge.qp === qpType || edge.qp === 9 || qpType === 9)) {
+        // 获取所有出边的下一个节点
+        const targetNode = nodes.find(n => n.id === edge.target);
+        // 若存在目标节点，则递归访问
+        if (targetNode) {
+          if (targetNode.id === startModuleId) {
+            // 若目标节点是起始规则节点所在的模块节点，则说明存在闭环，将当前路径存入 cycles
+            cycles.push([...path, targetNode.id]);
+          } else if (!visited.has(targetNode.id)) {
+            // 若目标节点未访问过，则递归访问
+            if (targetNode.isParent) {
+              // 如果目标节点是模块节点，则递归其子节点
+              nodes.forEach(childNode => {
+                if (childNode.parentNode === targetNode.id) {
+                  dfs(childNode, path, startModuleId, qpType);
+                }
+              });
+            } else {
+              dfs(targetNode, path, startModuleId, qpType);
+            }
+          }
+        }
+      }
+    });
+
+    path.pop(); // 递归结束后，将当前节点从路径中移除
+    recStack.delete(node.id); // 从递归栈中移除当前节点
+  };
+  nodes.forEach(node => {
+    if (!visited.has(node.id) && !node.isParent) {
+      // 只对规则节点进行 DFS
+      const startModuleId = node.parentNode;
+      dfs(node, [], startModuleId, node.data.qp);
+    }
+  });
+  return new Set(cycles.map(cycle => Array.from(cycle).join(' -> ')));
+}
+
+// 保存配置
+const saveSetting = () => {
+  let save = detectCycles(nodes.value, edges.value);
+  console.log(save);
+  if(save.size > 0){
+    let Arr = Array.from(save)
+    ElMessageBox.confirm('存在闭环：' + JSON.stringify(Arr) + '\n', '提示', {
+      confirmButtonText: '确定',
+      showCancelButton: false,
+      // cancelButtonText: '取消',
+      type: 'warning',
+    }).then(() => {});
+    // ElMessage({
+    //   type: 'error',
+    //   message: '存在闭环，请检查!',
+    // });
+    return
+  }
+  // 保存配置
+  saveConfig(formConfig(nodes.value));
+}
+
+// 发布配置之前对比
+const releaseSetting = () => {
+  finalObj.value = formConfig(nodes.value);
+  comparsion.value.oldVision = JSON.stringify(formConfig(nodesSave.value), null, 2);
+  comparsion.value.newVision = JSON.stringify(finalObj.value, null, 2);
+  diffContent.value = highlightDifferences(comparsion.value.oldVision, comparsion.value.newVision);
+  dialogFormComparison.value = !dialogFormComparison.value;
+}
+
+// 对比两个字符串，高亮显示不同之处
+const highlightDifferences = (contentA, contentB) => {
+  const differences = diffWords(contentA, contentB);
+  let highlightedContent = '';
+
+  differences.forEach((part) => {
+    // 根据 diff 的类型，使用不同的颜色显示(added: 新增, removed: 删除)
+    if (part.added) {
+      highlightedContent += `<span style="color: red;">${part.value}</span>`;
+    } else {
+      highlightedContent += part.value;
+    }
+  });
+
+  return highlightedContent;
+}
+
+// 发布窗口确认按钮
+const releaseSettingComfirm = () => {
+  // 保存配置
+  saveConfig(finalObj.value)
+  ElMessage({
+    type: 'success',
+    message: '发布成功!',
+  });
+  dialogFormComparison.value = !dialogFormComparison.value;
+}
+
+// 发布窗口取消按钮
+const releaseCancel = () => {
+  dialogFormComparison.value = !dialogFormComparison.value;
+}
+
+// 搜索时是否隐藏无关节点
+const nodeVisiable = (e) => {
+  visiable.value = e;
+  if(formSearch.qp && formSearch.type && formSearch.trxtype && formSearch.inputModule){
+    searchNodes();
+  }
+}
 
 // 重置搜索框
 const resetForm = () => {
@@ -344,24 +721,36 @@ const getParentIdByChildId = (setData) => {
 
 // 设置高亮
 const highlighted = (highlightedNodes) => {
-  // 根据搜索条件高亮显示相关节点，非相关节点隐藏
-  nodes.value = nodes.value.filter(item => {
-    let temp = getParentIdByChildId(highlightedNodes)
-    return (temp.has(item.id) || highlightedNodes.has(item.id))
-  })
-  nodes.value?.forEach(item => {
-    // 筛选到的节点高亮设置
-    if(item.isChild){
-      item.style.border = '3px solid #FFC0CB';
-    }
-  });
-  // 根据搜索条件高亮显示相关边，非相关边隐藏
-  edges.value = edges.value.filter(item => highlightedNodes.has(item.id))
-  edges.value?.forEach(item => {
-    item.style.stroke = '#FFC0CB';
-    item.style.strokeWidth = 3;
-  })
-
+  if(visiable.value){
+    // 根据搜索条件高亮显示相关节点，非相关节点隐藏
+    nodes.value = nodes.value.filter(item => {
+      let temp = getParentIdByChildId(highlightedNodes)
+      return (temp.has(item.id) || highlightedNodes.has(item.id))
+    })
+    nodes.value?.forEach(item => {
+      // 筛选到的节点高亮设置
+      if(item.isChild){
+        item.style.border = '3px solid #FFC0CB';
+      }
+    });
+    // 根据搜索条件高亮显示相关边，非相关边隐藏
+    edges.value = edges.value.filter(item => highlightedNodes.has(item.id))
+    edges.value?.forEach(item => {
+      item.style.stroke = '#FFC0CB';
+      item.style.strokeWidth = 3;
+    })
+  } else {
+    // 高亮显示相关节点和边且不隐藏非相关节点和边
+    nodes.value.filter(item => {
+      if(item.isChild && highlightedNodes.has(item.id)){
+        item.style.border = '3px solid #FFC0CB'
+      }
+    })
+    edges.value.filter(item => highlightedNodes.has(item.id)).forEach(item => {
+      item.style.stroke = '#FFC0CB';
+      item.style.strokeWidth = 3;
+    })
+  }
 }
 
 // 高亮所有符合条件的点和边
@@ -596,11 +985,13 @@ const updateRules = (data) => {
     let thisEdge = edges.value.find(item => item.source === data.oldValue || item.target === data.oldValue)
     if(thisEdge){
       edges.value.filter(item => {
+        let qp = nodes.value.find(e => e.id === item.source)?.data.qp;
         if(item.source === data.oldValue){
           edge = {
             id: `e${data.newValue}~${item.target}`, 
+            qp: qp,
             zIndex: 1050,
-            // type: 'straight',   // 连线样式
+            // type: 'step',   // 连线样式
             source: data.newValue, 
             target: item.target,
             sourceHandle: `${data.newValue}_right`,
@@ -610,8 +1001,9 @@ const updateRules = (data) => {
         } else if (item.target === data.oldValue) {
           edge = {
             id: `e${item.source}~${data.newValue}`, 
+            qp: qp,
             zIndex: 1050,
-            // type: 'straight',   // 连线样式
+            // type: 'step',   // 连线样式
             source: item.source, 
             target: data.newValue,
             sourceHandle: `${item.source}_right`,
@@ -682,15 +1074,17 @@ const addNode = (nodeType,data) => {
     // 需要的数据汇总：
     // 本节点id(需要通过传参获得)
     bigNodeIndex.value = nodes.value.filter(e => {return e.isParent === true}).length;
-    ElMessageBox.prompt('Please input your module id', 'Tip', {
-      confirmButtonText: 'OK',
-      cancelButtonText: 'Cancel',
+    ElMessageBox.prompt('请输入模块名称', 'Tip', {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
     })
       .then(({ value }) => {
+        let posi = getPosition(bigNodeIndex.value, value);
         nodes.value.push({
           id: value,
+          topic: "",
           type: 'module',
-          position: { x: 50+(340+50) * bigNodeIndex.value, y: 5 },
+          position: { x: posi.x, y: posi.y },
           isParent: true,
           parentNode: null,
           data: { 
@@ -702,19 +1096,99 @@ const addNode = (nodeType,data) => {
             ...usualBigStyle.value
           },
         })
+        if(value.indexOf('bankcomm') > -1){
+          // bankcomm模块节点背景色
+          nodes.value.find(item => {return item.id === value}).style.backgroundColor = '#E9F5FF'
+        } else if(value.indexOf('bridge') > -1){
+            // 其他模块节点背景色
+            nodes.value.find(item => {return item.id === value}).style.backgroundColor = '#E9FFFF';
+        } else if(value.indexOf('cupdcomm') > -1){
+            // 其他模块节点背景色
+            nodes.value.find(item => {return item.id === value}).style.backgroundColor = '#F5E8FF';
+        } else {
+            // 其他模块节点背景色
+            nodes.value.find(item => {return item.id === value}).style.backgroundColor = '#FFE0BF';
+        }
+        // 重置模块表单
         bigNodeIndex.value++;
+        // 重置规则表单
         settingValue.value.target.push({ label: value, value: value })
       })
       .catch(() => {})
   }
 }
 
+// 直接添加模块
+const dragModule = (type) => {
+  let bankcomm = [];
+  let nonBankcomm = [];
+  // 模块节点个数
+  bigNodeIndex.value = nodes.value.length;
+  nodes.value.forEach(item => {
+      if (item.id.indexOf('bankcomm') > -1 && item.isParent){
+          bankcomm.push(item);
+      } else if (item.id.indexOf('bankcomm') === -1 && item.isParent){
+          nonBankcomm.push(item);
+      }
+  });
+  let posi = '';
+  if(type === 'bankcomm'){
+    // bankcomm模块节点背景色及位置
+    posi = getPosition(bigNodeIndex.value, `bankcomm${bigNodeIndex.value}`);
+    nodes.value.push({
+      id: `bankcomm${bankcomm.length}`,
+      topic: "",
+      type: 'module',
+      position: { x: posi.x, y: posi.y },
+      isParent: true,
+      parentNode: null,
+      data: { 
+        label: `bankcomm${bankcomm.length}`,
+        isParent: true,
+        children: [],
+      },
+      style: {
+        ...usualBigStyle.value
+      },
+    })
+    // bankcomm模块节点背景色
+    nodes.value.find(item => {return item.id === `bankcomm${bankcomm.length}`}).style.backgroundColor = '#E9F5FF';
+    // 重置规则表单
+    settingValue.value.target.push({ label: `bankcomm${bankcomm.length}`, value: `bankcomm${bigNodeIndex.value}` })
+  } else {
+    // 其他模块节点背景色及位置
+    posi = getPosition(bigNodeIndex.value, `module${bigNodeIndex.value}`);
+    nodes.value.push({
+      id: `module${nonBankcomm.length}`,
+      topic: "",
+      type: 'module',
+      position: { x: posi.x, y: posi.y },
+      isParent: true,
+      parentNode: null,
+      data: { 
+        label: `module${nonBankcomm.length}`,
+        isParent: true,
+        children: [],
+      },
+      style: {
+        ...usualBigStyle.value
+      },
+    })
+    // 其他模块节点背景色
+    nodes.value.find(item => {return item.id === `module${nonBankcomm.length}`}).style.backgroundColor = '#FFE0BF';
+    // 重置规则表单
+    settingValue.value.target.push({ label: `module${nonBankcomm.length}`, value: `module${bigNodeIndex.value}` })
+  }
+}
+
 // 添加边
 const addEdge = (e) => {
+  let qp = nodes.value.find(item => item.id === e.source)?.data.qp;
   let newEdge = { 
     id: `e${e.source}~${e.target}`, 
+    qp: qp,
     zIndex: 1050,
-    // type: 'straight',   // 连线样式 
+    // type: 'step',   // 连线样式 
     source: e.source, 
     target: e.target,
     style: { stroke: '#ccc' },
@@ -747,22 +1221,25 @@ const confirmOption = () => {
   node.data.bank = form.bank;
   node.data.trxtype = form.trxtype;
 
+  // 更改target后的新线
   if(form.target && form.target !== childSetting.value.parentNode && targetValue.value.newValue) {
     node.data.target = form.target;
     // 连线
     let nodeE = "";
     nodeE = nodes.value.find(item => {return item.id === childSetting.value.id});
+    let qp = nodes.value.find(item => item.id === nodeE.id)?.data.qp;
     let edge = {
       id: `e${nodeE.id}~${form.target}`, 
+      qp: qp,
       zIndex: 1050,
-      // type: 'straight',   // 连线样式 
+      // type: 'step',   // 连线样式 
       source: nodeE.id, 
       target: form.target,
       sourceHandle: `${nodeE.id}_right`,
       targetHandle: `${form.target}_left`,
-      markerEnd: MarkerType.ArrowClosed
+      markerEnd: MarkerType.ArrowClosed  // 箭头
     }
-    // 更改target后的新线
+    // 添加新线
     addEdge(edge);
     // 删除更改target之前的老线
     removeEdges(`e${nodeE.id}~${targetValue.value.oldValue}`)
@@ -778,13 +1255,37 @@ const confirmOption = () => {
 
 // 连线开始
 const onConnectStart = (e) => {
-  // console.log('连线开始',e)
-  childSetting.value = nodes.value.find(item => item.id === e.nodeId)
+  let edge = edges.value.find(item => item.source === e.nodeId)
+  if(!edge) {
+    childSetting.value = nodes.value.find(item => item.id === e.nodeId)
+  }
 }
 
 // 连线触发
 const onConnect = (e) => {
-  addEdge(e)
+  let edge = edges.value.find(item => item.source === e.source)
+  if(edge){
+    // 禁止单条规则连接多个模块
+    ElMessage({
+      type: 'info',
+      message: '禁止单条规则连接多个模块',
+    });
+    return false
+  }
+  nodes.value.find(item => {
+    if(item.id === e.target){
+      if(item.isChild){
+        // 禁止直接连接子节点
+        ElMessage({
+          type: 'info',
+          message: '禁止直连规则',
+        });
+        return false
+      } else {
+        addEdge(e)
+      }
+    }
+  })
 }
 
 // 连线结束
@@ -822,23 +1323,22 @@ const calculation = (node) => {
   }
   return isIn;
 }
+
+// 节点拖动开始
 const onNodeDragStart = (event) => {
 }
+
+// 节点拖动结束后更新节点位置(只支持父节点拖动)
 const onNodeDragStop = (event) => {
-  const { node, nodes } = event;
-  if (node.parent) {
-    let inRange = calculation(node);
-    const parentNode = nodes.find(n => {return n.id === node.parent});
-    if (parentNode && inRange) {
-      // 计算子节点相对于父节点的新位置
-      const relativeX = node.position.x - parentNode.position.x;
-      const relativeY = node.position.y - parentNode.position.y;
-      // 更新子节点的位置
-      node.position = {
-        x: parentNode.position.x + relativeX,
-        y: parentNode.position.y + relativeY,
-      };
-    }
+  const { node } = event;
+  // 判断是否为父节点
+  if (node.isParent) {
+    nodes.value.filter(item => {
+      if(item.id === node.id){
+        // 更新节点位置
+        item.position = node.position;
+      }
+    })
   }
 }
 
@@ -860,13 +1360,17 @@ const onNodeSClick = (event) => {
       // 单击选中该子节点
       let str = childrenSetting.value.find(item => {return item.id === event.node.id});
       if(!str){
+        // 选中添加项
         childrenSetting.value.push(event.node);
+        // 选中的节点边框加粗
         childrenSetting.value.forEach(item => item.style.border = '3px solid #b3d9ff');
       } else {
         // 取消删除项
         let indexToRemove = childrenSetting.value.findIndex(item => item.id === event.node.id);
+        // 选中的节点边框恢复
         if(indexToRemove !== -1){
           childrenSetting.value[indexToRemove].style.border = '1px solid #ccc';
+          // 删除选中项
           childrenSetting.value.splice(indexToRemove, 1)
         }
       }
@@ -886,22 +1390,6 @@ const onNodeSClick = (event) => {
       }
     }
   })
-}
-
-// 双击选中节点
-const onNodeClick = (event) => {
-  // 双击子节点可打开该子节点的配置框，更改其中配置
-  if(event.node.isChild){
-    // 双击选中该子节点
-    form.qp = event.node.data.qp;
-    form.type = event.node.data.type;
-    form.bank = event.node.data.bank;
-    form.trxtype = event.node.data.trxtype;
-    form.target = event.node.data.target;
-    childSetting.value = event.node;
-    targetValue.value.oldValue = form.target
-    dialogFormVisible.value = !dialogFormVisible.value
-  }
 }
 
 // 用于选中边
@@ -933,9 +1421,17 @@ const exportConfig = () => {
 /* import the default theme, this is optional but generally recommended */
 @import "@vue-flow/core/dist/theme-default.css";
 @import '@vue-flow/controls/dist/style.css';
+.formatted-json {
+  white-space: pre-wrap; /* 保留空格和换行符 */
+  word-wrap: break-word; /* 防止长单词溢出容器 */
+  font-family: monospace; /* 使用等宽字体以保持对齐 */
+  border: 1px solid #dcdfe6; /* 可选：添加边框以模拟文本框外观 */
+  padding: 10px; /* 可选：添加内边距以改善视觉效果 */
+  overflow-y: auto; /* 可选：添加垂直滚动条以防止内容溢出 */
+}
 .vue-flow-container {
   margin: 0;
-  width: 89vw;
+  width: 90vw;
   height: 90vh;
 }
  
@@ -953,5 +1449,12 @@ const exportConfig = () => {
 }
 .demo-form-inline .el-form-item {
   margin-bottom: 10px;
+}
+
+.center-content {
+  display: flex !important;
+  justify-content: right; /* 水平居中 */
+  align-items: center; /* 垂直居中 */
+  height: 100%; /* 确保父容器有高度 */
 }
 </style>

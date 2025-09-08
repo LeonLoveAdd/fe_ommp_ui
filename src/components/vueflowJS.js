@@ -11,6 +11,7 @@ const usualSmallStyle = ref({
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '10px',
+    backgroundColor: '#9FCEFF',
 })
 //大节点通用style
 const usualBigStyle = ref({
@@ -23,8 +24,10 @@ const usualBigStyle = ref({
     flexDirection: 'column',
     alignItems: 'center', //水平居中
     //justifyContent: 'center', //垂直居中
-    paddingTop: '2px',
+    paddingTop: '6px',
     paddingLeft: '10px',
+    paddingRight: '10px',
+    // backgroundColor: '#E9F5FF'
 })
 // 响应
 let obj = {
@@ -32,27 +35,63 @@ let obj = {
     data: {
         "modules": {
             "cupdfe-bankcomm": [
-                { qp: 0, type: 'all', trxtype: '0000', bank: '0000', routeType: 'I', target: 'cupdfe-bridge'}
+                { qp: 0, type: 'all', trxtype: '0000', bank: '0000', routeType: 'I', target: 'cupdfe-bridge' }
             ],
             "cupdfe-bridge": [
                 { qp: 9, type: 'fix', trxtype: '0000', bank: '0000', routeType: 'I', target: 'cupdfe-fix' },
-                { qp: 9, type: 'iso', trxtype: '0000', routeType: 'I', target: 'cupdfe-iso' },
-                { qp: 1, type: 'iso', trxtype: '0830', bank: '0000', routeType: 'I', target: 'cupdfe-secret' },
+                { qp: 9, type: 'iso', trxtype: '0000', routeType: 'I', target: 'cupdfe-secret' },
+                { qp: 1, type: 'iso', trxtype: '0830', bank: '0000', routeType: 'I', target: 'cupdfe-iso' },
             ],
             "cupdfe-fix": [
                 { qp: 0, type: 'fix', trxtype: '0000', bank: '0000', routeType: 'I', target: 'cupdfe-cupdcomm' }
             ],
+            // "cupdfe-bankcomm1": [
+            //     { qp: 0, type: 'all', trxtype: '0000', bank: '0000', routeType: 'I', target: 'cupdfe-bridge' }
+            // ],
+            // "cupdfe-bankcomm2": [
+            //     { qp: 0, type: 'all', trxtype: '0000', bank: '0000', routeType: 'I', target: 'cupdfe-bridge' }
+            // ],
+            // "cupdfe-iso": [
+            //     { qp: 0, type: 'fix', trxtype: '0000', bank: '0000', routeType: 'I', target: 'cupdfe-cupdcomm' }
+            // ],
+            // "cupdfe-cupdcomm": [
+            //     { qp: 0, type: 'fix', trxtype: '0000', bank: '0000', routeType: 'I', target: 'cupdfe-bridge' }
+            // ],
         }
     },
     msg: ''
 }
+// 初始化节点位置 bankcomm
+const positionInitTest = (index) => {
+    let quotient = Math.floor(index / 2); // 商
+    let remainder = index % 2; // 余数
+    let x = 550 + (340 + 50) * remainder;
+    let y = 5 + (300 + 10) * quotient;
+    let position = { x: x, y: y };
+    return position;
+}
+const positionInit = (index, moduleType) => {
+    let y = 10 + (300 + 10) * index;
+    let position = { };
+    if(moduleType.indexOf('bankcomm') > -1) {
+        position = { x: 50, y: y };
+    } else if(moduleType.indexOf('bridge') > -1) {
+        position = { x: 450, y: y };
+    } else if (moduleType.indexOf('cupdcomm') > -1) {
+        position = { x: 1250, y: y };
+    } else {
+        position = { x: 850, y: y };
+    }
+    return position;
+}
 // 格式化数据
 const transformData = (data) => {
-    if (!data.modules){
+    if (!data.modules) {
         return
     }
     // 获取 modules 对象中所有模块的键
     let moduleNames = Object.keys(data.modules);
+    let moduleNamesStr = moduleNames.toString();
 
     // 遍历所有模块
     moduleNames.forEach((moduleName, index) => {
@@ -76,34 +115,44 @@ const transformData = (data) => {
                     target: customNode.target,
                     isChild: true,
                     label: id,
-                    isVisible: false,
                 },
                 style: {
                     ...usualSmallStyle.value
                 },
             }
-            let edge = {
-                id: `e${id}~${customNode.target}`,
-                zIndex: 1050,
-                // type: 'straight',   // 连线样式
-                source: id,
-                target: customNode.target,
-                style: { stroke: '#ccc' },
-                markerEnd: MarkerType.ArrowClosed,
-                sourceHandle: `${id}_right`,  // 使用节点 node1 的 left 句柄作为起点(sourceHandle为source节点的id)
-                targetHandle: `${customNode.target}_left`,  // 使用节点 node2 的 right 句柄作为终点(targetHandle为target节点的id) 
-            };
+            let edge = null;
+            // 判断 target 是否存在于模块中
+            let targetExist = customNode.target ? moduleNamesStr.indexOf(customNode.target) > -1 : false;
+
+            // 如果有 target 属性，且 target 存在
+            if (id && targetExist) {
+                edge = {
+                    id: `e${id}~${customNode.target}`,
+                    qp: customNode.qp,
+                    zIndex: 1050,
+                    // type: 'step',   // 连线样式
+                    source: id,
+                    target: customNode.target,
+                    style: { stroke: '#ccc' },
+                    markerEnd: MarkerType.ArrowClosed,
+                    sourceHandle: `${id}_right`,  // 使用节点 node1 的 left 句柄作为起点(sourceHandle为source节点的id)
+                    targetHandle: `${customNode.target}_left`,  // 使用节点 node2 的 right 句柄作为终点(targetHandle为target节点的id) 
+                };
+            }
             arr.push({ id: `${moduleName}_${index}` });
             nodes.value.push(child);
-            edges.value.push(edge);
+            if (edge) {
+                edges.value.push(edge);
+            }
         })
-
+        let posi = positionInit(index, moduleName);
         // 对当前模块的内容进行加工
         let module = {
             id: moduleName,
+            topic: '',
             type: 'module',
             isParent: true,
-            position: { x: 50 + (340 + 50) * index, y: 5 },
+            position: { x: posi.x, y: posi.y },
             parentNode: null,
             data: {
                 label: moduleName,
@@ -117,36 +166,25 @@ const transformData = (data) => {
             targetPosition: Position.Right,
             classes: ['custom-big-node'],
         }
+        if (moduleName.indexOf('bankcomm') > -1) {
+            // bankcomm模块节点背景色
+            module.style.backgroundColor = '#E9F5FF';
+        } else if (moduleName.indexOf('bridge') > -1) {
+            // 其他模块节点背景色
+            module.style.backgroundColor = '#E9FFFF';
+        } else if (moduleName.indexOf('cupdcomm') > -1) {
+            // 其他模块节点背景色
+            module.style.backgroundColor = '#F5E8FF';
+        } else {
+            // 其他模块节点背景色
+            module.style.backgroundColor = '#FFE0BF';
+        }
         nodes.value.push(module)
     });
 }
 // 保存配置(将nodes转为需要的数据结构)
-const saveConfig = (nodes) => {
-    let obj = {};
-    obj.modules = {};
-    let names = [];
-    nodes.forEach(item => {
-        if (item.isParent) {
-            names.push(item.id);
-        }
-    });
-    names.forEach(item => {
-        let arr = []
-        nodes.forEach(e => {
-            if (e.parentNode === item) {
-                arr.push({
-                    qp: e.data.qp,
-                    type: e.data.type,
-                    trxtype: e.data.trxtype,
-                    bank: e.data.bank,
-                    routeType: "I",
-                    target: e.data.target,
-                })
-            }
-            obj.modules[item] = arr
-        })
-    })
-    console.log('最终参数', obj)
+const saveConfig = (obj) => {
+    console.log('发布成功', obj)
 }
 const nodes = ref([])
 //节点设值
@@ -204,4 +242,4 @@ const settingValue = ref({
     target: [],
 })
 
-export { nodes, edges, usualBigStyle, usualSmallStyle, settingValue, transformData, saveConfig, obj }
+export { nodes, edges, usualBigStyle, usualSmallStyle, settingValue, positionInit, transformData, saveConfig, obj }
